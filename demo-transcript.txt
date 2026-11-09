@@ -1,0 +1,127 @@
+LoomLedge demo - operator, loom, band, tension and defect loop
+Data file: .demo-scratch/studio.json (recreated on every run, deleted at the end)
+Commands are shown as `loomledge ...`; this script calls `python3 loomledge.py`.
+
+$ loomledge --version
+LoomLedge 1.0.0
+
+-- operator sign-in ------------------------------------------------
+
+# the passphrase is piped on stdin, twice, and never echoed
+$ loomledge operator register mira --data .demo-scratch/studio.json
+registered operator mira
+hint  run operator login mira to sign in
+
+$ loomledge loom list --data .demo-scratch/studio.json
+error: not signed in - run operator login <name>
+exit 1
+
+# data commands refuse to run without a session (exit 1 above)
+
+$ loomledge operator login mira --data .demo-scratch/studio.json
+signed in as mira (session expires 2024-05-01 20:43 UTC)
+hint  data commands now run without the passphrase
+
+-- loom registry --------------------------------------------------
+
+$ loomledge loom add Rig --heddles 400 --shafts 8 --data .demo-scratch/studio.json
+added loom Rig (400 heddles, 8 shafts, 50.00 heddles per shaft)
+
+$ loomledge loom add Rig --heddles 200 --data .demo-scratch/studio.json
+error: a loom named Rig already exists - run loom list
+exit 1
+
+# a duplicate loom name is rejected with exit 1 and changes nothing
+
+$ loomledge loom show Rig --data .demo-scratch/studio.json
+loom           Rig
+heddles        400
+shafts         8
+heddles/shaft  50.00
+band           -
+open defects   0
+added          2024-05-01 08:45 UTC
+
+-- warp tension tolerance band ------------------------------------
+
+$ loomledge band set Rig --min 380 --max 460 --data .demo-scratch/studio.json
+tolerance band for Rig set to 380-460 g
+
+$ loomledge band show Rig --data .demo-scratch/studio.json
+tolerance band for Rig: 380-460 g
+hint  run tension check Rig --grams G to grade a reading
+
+-- tension checks -------------------------------------------------
+
+$ loomledge tension check Rig --grams 420 --data .demo-scratch/studio.json
+reading  420 g
+band     380-460 g
+margin   23 g either side of the band warns
+verdict  ok
+hint  run tension history Rig to see stored readings
+
+$ loomledge tension check Rig --grams 470 --data .demo-scratch/studio.json
+reading  470 g
+band     380-460 g
+margin   23 g either side of the band warns
+verdict  warn
+hint  run tension history Rig to see stored readings
+
+$ loomledge tension check Rig --grams 520 --data .demo-scratch/studio.json
+reading  520 g
+band     380-460 g
+margin   23 g either side of the band warns
+verdict  fail
+hint  run tension history Rig to see stored readings
+
+$ loomledge tension history Rig --data .demo-scratch/studio.json
+CHECKED               GRAMS  VERDICT
+────────────────────  ─────  ───────
+2024-05-01 09:20 UTC    520  fail
+2024-05-01 09:15 UTC    470  warn
+2024-05-01 09:10 UTC    420  ok
+
+-- selvedge defects -----------------------------------------------
+
+$ loomledge defect log Rig --type float --severity high --side left -m "two floats at the left selvedge" --data .demo-scratch/studio.json
+logged defect #1 (float, high, left) on Rig
+hint  run defect list --open to see every open defect
+
+$ loomledge defect log Rig --type draw-in --severity med --side left --data .demo-scratch/studio.json
+logged defect #2 (draw-in, med, left) on Rig
+hint  run defect list --open to see every open defect
+
+$ loomledge defect list --open --data .demo-scratch/studio.json
+2 open defects
+ID  DATE        LOOM  TYPE     SEVERITY  SIDE  STATUS
+──  ──────────  ────  ───────  ────────  ────  ──────
+ 2  2024-05-01  Rig   draw-in  med       left  open
+ 1  2024-05-01  Rig   float    high      left  open
+
+$ loomledge defect resolve 1 --data .demo-scratch/studio.json
+resolved defect #1 on Rig (1 still open)
+
+$ loomledge defect list --loom Rig --data .demo-scratch/studio.json
+1 open defect
+ID  DATE        LOOM  TYPE     SEVERITY  SIDE  STATUS
+──  ──────────  ────  ───────  ────────  ────  ────────
+ 2  2024-05-01  Rig   draw-in  med       left  open
+ 1  2024-05-01  Rig   float    high      left  resolved
+
+$ loomledge loom list --data .demo-scratch/studio.json
+LOOM  HEDDLES  SHAFTS  BAND       OPEN
+────  ───────  ──────  ─────────  ────
+Rig       400       8  380-460 g     1
+
+-- sign out -------------------------------------------------------
+
+$ loomledge operator logout --data .demo-scratch/studio.json
+signed out mira
+
+$ loomledge loom list --data .demo-scratch/studio.json
+error: not signed in - run operator login <name>
+exit 1
+
+# signed out, so the same command is refused again (exit 1)
+
+demo complete
