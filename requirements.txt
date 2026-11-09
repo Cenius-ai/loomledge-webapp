@@ -1,0 +1,4 @@
+# LoomLedge runs on the Python standard library alone - it has no runtime
+# dependencies.  The single entry below is the test runner used by the suite in
+# tests/ (`python3 -m pytest`).
+pytest==8.3.4

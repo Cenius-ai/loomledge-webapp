@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loomledge"
+version = "1.0.0"
+description = "Warp tension tolerance bands, heddle counts and selvedge defects for hand-weaving studios."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "LoomLedge" }]
+keywords = ["weaving", "loom", "warp", "tension", "cli"]
+dependencies = []
+
+[project.scripts]
+loomledge = "loomledge:main"
+
+[tool.setuptools]
+py-modules = ["loomledge"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::pytest.PytestDeprecationWarning"]
